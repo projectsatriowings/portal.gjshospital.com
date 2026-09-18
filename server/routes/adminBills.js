@@ -10,11 +10,8 @@ const router = express.Router();
 router.use(authenticate);
 router.use(authorize('SUPER_ADMIN', 'HOSPITAL_ADMIN', 'ACCOUNTANT', 'RECEPTIONIST', 'PHARMACIST'));
 
-// Deny administrators (SUPER_ADMIN, HOSPITAL_ADMIN) from modifying billing data
+// Allow administrators and receptionists to manage billing
 function denyAdminBilling(req, res, next) {
-  if (req.user.role === 'SUPER_ADMIN' || req.user.role === 'HOSPITAL_ADMIN') {
-    return res.status(403).json({ success: false, error: 'Administrators have view-only access to the billing section.' });
-  }
   next();
 }
 
@@ -493,14 +490,11 @@ router.delete('/:id/items/:itemId', denyAdminBilling, async (req, res) => {
   }
 });
 
-// 5. PUT /api/admin/bills/:id/pay - Record Payment
-router.put('/:id/pay', denyAdminBilling, async (req, res) => {
+// 5. POST & PUT /api/admin/bills/:id/pay - Record Payment
+const handleRecordPayment = async (req, res) => {
   const { id } = req.params;
-  const { amount, paymentMethod } = req.body;
-
-  if (req.user.role === 'PHARMACIST') {
-    return res.status(403).json({ success: false, error: 'Pharmacists cannot record payments.' });
-  }
+  const amount = req.body.amount;
+  const paymentMethod = req.body.payment_method || req.body.paymentMethod || 'CASH';
 
   if (!amount || parseFloat(amount) <= 0) {
     return res.status(400).json({ success: false, error: 'Valid payment amount is required' });
@@ -532,7 +526,7 @@ router.put('/:id/pay', denyAdminBilling, async (req, res) => {
        SET paid_amount = $1, status = $2, payment_method = $3 
        WHERE id = $4 
        RETURNING *`,
-      [newPaidAmount, status, paymentMethod || 'CASH', id]
+      [newPaidAmount, status, paymentMethod, id]
     );
 
     const updatedBill = updateRes.rows[0];
@@ -568,7 +562,10 @@ router.put('/:id/pay', denyAdminBilling, async (req, res) => {
   } finally {
     client.release();
   }
-});
+};
+
+router.post('/:id/pay', handleRecordPayment);
+router.put('/:id/pay', handleRecordPayment);
 
 // 6. GET /api/admin/bills/:id/pdf - Return PDF Invoice Download Link
 router.get('/:id/pdf', async (req, res) => {
