@@ -53,6 +53,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Routes Registration
 app.use('/admin/auth', adminAuthRoutes);
+app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/admin/patients', adminPatientsRoutes);
 app.use('/api/admin/appointments', adminAppointmentsRoutes);
 app.use('/api/admin/bills', adminBillsRoutes);
