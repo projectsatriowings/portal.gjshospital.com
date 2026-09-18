@@ -7,7 +7,7 @@ export default function BillDetailModal({ isOpen, onClose, billId, authFetch, on
   if (!isOpen || !billId) return null;
 
   const { user } = useAuth();
-  const isReceptionist = user?.role === 'RECEPTIONIST';
+  const isReceptionist = user?.role === 'RECEPTIONIST' || user?.role === 'SUPER_ADMIN' || user?.role === 'HOSPITAL_ADMIN' || user?.role === 'ADMIN' || user?.role === 'ACCOUNTANT';
 
   const [bill, setBill] = useState(null);
   const [loading, setLoading] = useState(true);
