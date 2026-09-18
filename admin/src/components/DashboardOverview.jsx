@@ -37,7 +37,14 @@ export default function DashboardOverview({
   const [recentAppointments, setRecentAppointments] = useState([]);
   const [recentPatients, setRecentPatients] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [pharmStats, setPharmStats] = useState(null);
+  const [pharmStats, setPharmStats] = useState({
+    totalMedicines: 0,
+    totalStock: 0,
+    lowStockCount: 0,
+    expiringCount: 0,
+    todaySales: 0,
+    monthlyRevenue: 0
+  });
 
   const [appFilter, setAppFilter] = useState('all');
   const [appPage, setAppPage] = useState(1);
@@ -463,7 +470,7 @@ export default function DashboardOverview({
               <div style={{ background: '#f0fdfa', color: '#0d9488', padding: '8px', borderRadius: '8px' }}><Pill size={18} /></div>
               <div>
                 <span style={{ fontSize: '10.5px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block' }}>Medicines Master</span>
-                <strong style={{ fontSize: '16px', color: '#0f172a', display: 'block', marginTop: '1px' }}>{pharmStats.totalMedicines} items</strong>
+                <strong style={{ fontSize: '16px', color: '#0f172a', display: 'block', marginTop: '1px' }}>{pharmStats?.totalMedicines || 0} items</strong>
               </div>
             </div>
 
@@ -471,7 +478,7 @@ export default function DashboardOverview({
               <div style={{ background: '#f8fafc', color: '#475569', padding: '8px', borderRadius: '8px' }}><Package size={18} /></div>
               <div>
                 <span style={{ fontSize: '10.5px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block' }}>Total Stock</span>
-                <strong style={{ fontSize: '16px', color: '#0f172a', display: 'block', marginTop: '1px' }}>{pharmStats.totalStock} units</strong>
+                <strong style={{ fontSize: '16px', color: '#0f172a', display: 'block', marginTop: '1px' }}>{pharmStats?.totalStock || 0} units</strong>
               </div>
             </div>
 
@@ -479,7 +486,7 @@ export default function DashboardOverview({
               <div style={{ background: '#fffbeb', color: '#d97706', padding: '8px', borderRadius: '8px' }}><AlertTriangle size={18} /></div>
               <div>
                 <span style={{ fontSize: '10.5px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block' }}>Low Stock Alert</span>
-                <strong style={{ fontSize: '16px', color: pharmStats.lowStockCount > 0 ? '#d97706' : '#0f172a', display: 'block', marginTop: '1px' }}>{pharmStats.lowStockCount} alert(s)</strong>
+                <strong style={{ fontSize: '16px', color: (pharmStats?.lowStockCount || 0) > 0 ? '#d97706' : '#0f172a', display: 'block', marginTop: '1px' }}>{pharmStats?.lowStockCount || 0} alert(s)</strong>
               </div>
             </div>
 
@@ -487,7 +494,7 @@ export default function DashboardOverview({
               <div style={{ background: '#fef2f2', color: '#dc2626', padding: '8px', borderRadius: '8px' }}><AlertTriangle size={18} /></div>
               <div>
                 <span style={{ fontSize: '10.5px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block' }}>Expiring Soon</span>
-                <strong style={{ fontSize: '16px', color: pharmStats.expiringCount > 0 ? '#dc2626' : '#0f172a', display: 'block', marginTop: '1px' }}>{pharmStats.expiringCount} alert(s)</strong>
+                <strong style={{ fontSize: '16px', color: (pharmStats?.expiringCount || 0) > 0 ? '#dc2626' : '#0f172a', display: 'block', marginTop: '1px' }}>{pharmStats?.expiringCount || 0} alert(s)</strong>
               </div>
             </div>
 
@@ -497,7 +504,7 @@ export default function DashboardOverview({
                   <div style={{ background: '#f0fdf4', color: '#16a34a', padding: '8px', borderRadius: '8px' }}><DollarSign size={18} /></div>
                   <div>
                     <span style={{ fontSize: '10.5px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block' }}>Today's Pharmacy Sales</span>
-                    <strong style={{ fontSize: '16px', color: '#16a34a', display: 'block', marginTop: '1px' }}>₹{parseFloat(pharmStats.todaySales || 0).toFixed(2)}</strong>
+                    <strong style={{ fontSize: '16px', color: '#16a34a', display: 'block', marginTop: '1px' }}>₹{parseFloat(pharmStats?.todaySales || 0).toFixed(2)}</strong>
                   </div>
                 </div>
 
@@ -505,7 +512,7 @@ export default function DashboardOverview({
                   <div style={{ background: '#eff6ff', color: '#2563eb', padding: '8px', borderRadius: '8px' }}><DollarSign size={18} /></div>
                   <div>
                     <span style={{ fontSize: '10.5px', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', display: 'block' }}>Pharmacy Monthly Revenue</span>
-                    <strong style={{ fontSize: '16px', color: '#2563eb', display: 'block', marginTop: '1px' }}>₹{parseFloat(pharmStats.monthlyRevenue || 0).toFixed(2)}</strong>
+                    <strong style={{ fontSize: '16px', color: '#2563eb', display: 'block', marginTop: '1px' }}>₹{parseFloat(pharmStats?.monthlyRevenue || 0).toFixed(2)}</strong>
                   </div>
                 </div>
               </>
