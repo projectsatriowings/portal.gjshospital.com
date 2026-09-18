@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layers, Plus, Edit, Trash2, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 export default function PharmacyCategories({ authFetch, user }) {
   const [categories, setCategories] = useState([]);
@@ -15,7 +16,7 @@ export default function PharmacyCategories({ authFetch, user }) {
     setLoading(true);
     setError(null);
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/medicines/categories');
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines/categories`);
       const data = await res.json();
       if (data.success) {
         setCategories(data.data || []);
@@ -43,7 +44,7 @@ export default function PharmacyCategories({ authFetch, user }) {
   const handleDelete = async (id, catName) => {
     if (!window.confirm(`Are you sure you want to delete category "${catName}"?`)) return;
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/medicines/categories/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines/categories/${id}`, {
         method: 'DELETE'
       });
       const data = await res.json();
@@ -68,8 +69,8 @@ export default function PharmacyCategories({ authFetch, user }) {
 
     try {
       const url = editingCat 
-        ? `http://localhost:5000/api/admin/medicines/categories/${editingCat.id}`
-        : 'http://localhost:5000/api/admin/medicines/categories';
+        ? `${API_BASE_URL}/admin/medicines/categories/${editingCat.id}`
+        : `${API_BASE_URL}/admin/medicines/categories`;
       const method = editingCat ? 'PUT' : 'POST';
 
       const res = await authFetch(url, {

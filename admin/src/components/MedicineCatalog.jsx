@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Pill, Search, Plus, Edit, Trash2, RefreshCw, CheckCircle2, AlertCircle, PackagePlus, AlertTriangle, Lock } from 'lucide-react';
 import StockInModal from './StockInModal';
+import { API_BASE_URL } from '../config/api';
 
 export default function MedicineCatalog({ authFetch, user }) {
   const [medicines, setMedicines] = useState([]);
@@ -23,7 +24,7 @@ export default function MedicineCatalog({ authFetch, user }) {
 
   const fetchCategories = async () => {
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/medicines/categories');
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines/categories`);
       const data = await res.json();
       if (data.success) {
         setCategories(data.data || []);
@@ -37,7 +38,7 @@ export default function MedicineCatalog({ authFetch, user }) {
     setLoading(true);
     setError(null);
     try {
-      let url = `http://localhost:5000/api/admin/medicines?status=${statusFilter}`;
+      let url = `${API_BASE_URL}/admin/medicines?status=${statusFilter}`;
       if (categoryFilter !== 'all') url += `&category_id=${categoryFilter}`;
       if (search.trim()) url += `&query=${encodeURIComponent(search.trim())}`;
 
@@ -89,8 +90,8 @@ export default function MedicineCatalog({ authFetch, user }) {
     setMsg('');
     try {
       const url = editingMed
-        ? `http://localhost:5000/api/admin/medicines/${editingMed.id}`
-        : `http://localhost:5000/api/admin/medicines`;
+        ? `${API_BASE_URL}/admin/medicines/${editingMed.id}`
+        : `${API_BASE_URL}/admin/medicines`;
 
       const method = editingMed ? 'PUT' : 'POST';
 

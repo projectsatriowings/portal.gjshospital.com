@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { X, Plus, Trash2, CreditCard, Download, Printer, CheckCircle2, Zap, FileText, Clock } from 'lucide-react';
+import { API_BASE_URL, getFileUrl } from '../config/api';
 
 export default function BillDetailModal({ isOpen, onClose, billId, authFetch, onBillUpdated }) {
   if (!isOpen || !billId) return null;
@@ -31,7 +32,7 @@ export default function BillDetailModal({ isOpen, onClose, billId, authFetch, on
 
   const fetchPatientHistory = async (patientId) => {
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/bills/active-visit/${patientId}`);
+      const res = await authFetch(`${API_BASE_URL}/admin/bills/active-visit/${patientId}`);
       const data = await res.json();
       if (data.success) {
         setPreviousBills(data.previousBills || []);
@@ -44,7 +45,7 @@ export default function BillDetailModal({ isOpen, onClose, billId, authFetch, on
   const fetchBillDetail = async () => {
     setLoading(true);
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/bills/${billId}`);
+      const res = await authFetch(`${API_BASE_URL}/admin/bills/${billId}`);
       const data = await res.json();
       if (data.success) {
         setBill(data.data);
@@ -53,7 +54,7 @@ export default function BillDetailModal({ isOpen, onClose, billId, authFetch, on
         // Check if patient has Buy Outside items
         if (data.data.appointment_id) {
           try {
-            const rxRes = await authFetch(`http://localhost:5000/api/admin/appointments/${data.data.appointment_id}/prescription`);
+            const rxRes = await authFetch(`${API_BASE_URL}/admin/appointments/${data.data.appointment_id}/prescription`);
             const rxData = await rxRes.json();
             if (rxData.success && Array.isArray(rxData.data?.medicines)) {
               const hasOutside = rxData.data.medicines.some(m => m.dispensed_status === 'NOT_DISPENSED');
@@ -80,106 +81,107 @@ export default function BillDetailModal({ isOpen, onClose, billId, authFetch, on
 
   const handleAddItem = async (e) => {
     e.preventDefault();
-    setError(null);
-    setMessage(null);
-
+    if (!itemDesc.trim() || !itemAmount) return;
+    setActionLoading(true);
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/bills/${billId}/items`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/bills/${billId}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           category: itemCategory,
-          description: itemDesc,
+          description: itemDesc.trim(),
           amount: parseFloat(itemAmount),
-          quantity: parseInt(itemQty, 10)
+          quantity: parseInt(itemQty, 10) || 1,
+          is_confirmed: true // Receptionist manual additions are confirmed
         })
       });
-
       const data = await res.json();
       if (data.success) {
-        setMessage('Line item added successfully!');
-        setShowAddItem(false);
+        setMessage('Item added to bill.');
         setItemDesc('');
         setItemAmount('');
         setItemQty('1');
+        setShowAddItem(false);
         fetchBillDetail();
         if (onBillUpdated) onBillUpdated();
       } else {
         setError(data.error || 'Failed to add item.');
       }
     } catch (err) {
-      setError('Network error adding line item.');
+      setError('Network error adding item.');
+    } finally {
+      setActionLoading(false);
     }
   };
 
-  const handleAddManualItem = async (cat, desc, amt) => {
-    setError(null);
-    setMessage(null);
+  // Quick Service Addition for Receptionist
+  const handleAddQuickService = async (serviceName, fee, category) => {
     setActionLoading(true);
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/bills/${billId}/items`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/bills/${billId}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          category: cat,
-          description: desc,
-          amount: parseFloat(amt),
-          quantity: 1
+          category,
+          description: serviceName,
+          amount: fee,
+          quantity: 1,
+          is_confirmed: true
         })
       });
-
       const data = await res.json();
       if (data.success) {
-        setMessage('Line item added successfully!');
+        setMessage(`${serviceName} added to bill.`);
         fetchBillDetail();
         if (onBillUpdated) onBillUpdated();
       } else {
-        setError(data.error || 'Failed to add item.');
+        setError(data.error || 'Failed to add service.');
       }
     } catch (err) {
-      setError('Network error adding line item.');
+      setError('Network error adding service.');
     } finally {
       setActionLoading(false);
     }
   };
 
   const handleDeleteItem = async (itemId) => {
-    if (!window.confirm('Are you sure you want to remove this line item?')) return;
+    if (!window.confirm('Are you sure you want to remove this item from the bill?')) return;
+    setActionLoading(true);
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/bills/${billId}/items/${itemId}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/bills/${billId}/items/${itemId}`, {
         method: 'DELETE'
       });
       const data = await res.json();
       if (data.success) {
-        setMessage('Line item removed.');
+        setMessage('Item removed.');
         fetchBillDetail();
         if (onBillUpdated) onBillUpdated();
       } else {
-        setError(data.error || 'Failed to delete item.');
+        setError(data.error || 'Failed to remove item.');
       }
     } catch (err) {
-      setError('Error deleting line item.');
+      setError('Network error removing item.');
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleRecordPayment = async (e) => {
     e.preventDefault();
-    setError(null);
-    setMessage(null);
-
+    if (!payAmount || parseFloat(payAmount) <= 0) return;
+    setActionLoading(true);
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/bills/${billId}/pay`, {
-        method: 'PUT',
+      const res = await authFetch(`${API_BASE_URL}/admin/bills/${billId}/pay`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: parseFloat(payAmount),
-          paymentMethod: payMethod
+          payment_method: payMethod
         })
       });
-
       const data = await res.json();
       if (data.success) {
-        setMessage(data.message || 'Payment recorded!');
+        setMessage('Payment recorded successfully!');
         setPayAmount('');
         fetchBillDetail();
         if (onBillUpdated) onBillUpdated();
@@ -188,15 +190,15 @@ export default function BillDetailModal({ isOpen, onClose, billId, authFetch, on
       }
     } catch (err) {
       setError('Network error recording payment.');
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleImportPrescription = async () => {
     setActionLoading(true);
-    setError(null);
-    setMessage(null);
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/bills/${billId}/import-prescription`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/bills/${billId}/import-prescription`, {
         method: 'POST'
       });
       const data = await res.json();
@@ -220,12 +222,12 @@ export default function BillDetailModal({ isOpen, onClose, billId, authFetch, on
       return;
     }
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/appointments/${bill.appointment_id}/prescription`);
+      const res = await authFetch(`${API_BASE_URL}/admin/appointments/${bill.appointment_id}/prescription`);
       const data = await res.json();
       if (data.success && data.data?.pdf_url) {
-        window.open(`http://localhost:5000${data.data.pdf_url}`, '_blank');
+        window.open(getFileUrl(data.data.pdf_url), '_blank');
       } else if (data.success && data.data?.paper_rx_url) {
-        window.open(data.data.paper_rx_url, '_blank');
+        window.open(getFileUrl(data.data.paper_rx_url), '_blank');
       } else {
         setError('No prescription PDF or scan available for this appointment.');
       }
@@ -236,10 +238,10 @@ export default function BillDetailModal({ isOpen, onClose, billId, authFetch, on
 
   const handleDownloadPdf = async () => {
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/bills/${billId}/pdf`);
+      const res = await authFetch(`${API_BASE_URL}/admin/bills/${billId}/pdf`);
       const data = await res.json();
       if (data.success && data.pdfUrl) {
-        window.open(`http://localhost:5000${data.pdfUrl}`, '_blank');
+        window.open(getFileUrl(data.pdfUrl), '_blank');
       }
     } catch (err) {
       setError('Failed to download invoice PDF.');
@@ -549,13 +551,13 @@ export default function BillDetailModal({ isOpen, onClose, billId, authFetch, on
                             type="button"
                             onClick={() => {
                               if (b.pdf_url) {
-                                window.open(`http://localhost:5000${b.pdf_url}`, '_blank');
+                                window.open(getFileUrl(b.pdf_url), '_blank');
                               } else {
-                                authFetch(`http://localhost:5000/api/admin/bills/${b.id}/pdf`)
+                                authFetch(`${API_BASE_URL}/admin/bills/${b.id}/pdf`)
                                   .then(r => r.json())
                                   .then(d => {
                                     if (d.success && d.pdfUrl) {
-                                      window.open(`http://localhost:5000${d.pdfUrl}`, '_blank');
+                                      window.open(getFileUrl(d.pdfUrl), '_blank');
                                     }
                                   });
                               }

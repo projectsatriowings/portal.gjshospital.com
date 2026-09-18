@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PackagePlus, Search, RefreshCw, Layers, Calendar, UserCheck, RefreshCw as LoopIcon } from 'lucide-react';
 import StockInModal from './StockInModal';
+import { API_BASE_URL } from '../config/api';
 
 export default function PharmacyStockManagement({ authFetch, user }) {
   const [medicines, setMedicines] = useState([]);
@@ -17,7 +18,7 @@ export default function PharmacyStockManagement({ authFetch, user }) {
 
   const fetchCategories = async () => {
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/medicines/categories');
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines/categories`);
       const data = await res.json();
       if (data.success) {
         setCategories(data.data || []);
@@ -32,7 +33,7 @@ export default function PharmacyStockManagement({ authFetch, user }) {
     setError(null);
     try {
       // 1. Fetch medicines
-      let medUrl = `http://localhost:5000/api/admin/medicines?status=${statusFilter}`;
+      let medUrl = `${API_BASE_URL}/admin/medicines?status=${statusFilter}`;
       if (categoryFilter !== 'all') medUrl += `&category_id=${categoryFilter}`;
       if (search.trim()) medUrl += `&query=${encodeURIComponent(search.trim())}`;
       
@@ -42,7 +43,7 @@ export default function PharmacyStockManagement({ authFetch, user }) {
       setMedicines(medData.data || []);
 
       // 2. Fetch stock movements ledger
-      const movRes = await authFetch('http://localhost:5000/api/admin/medicines/stock-movements');
+      const movRes = await authFetch(`${API_BASE_URL}/admin/medicines/stock-movements`);
       const movData = await movRes.json();
       if (!movData.success) throw new Error(movData.error || 'Failed to fetch ledger');
       setMovements(movData.data || []);

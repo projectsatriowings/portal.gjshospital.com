@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, PackagePlus, CheckCircle2, AlertCircle } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 export default function StockInModal({ isOpen, onClose, medicine, authFetch, onStockUpdated }) {
   if (!isOpen || !medicine) return null;
@@ -17,7 +18,7 @@ export default function StockInModal({ isOpen, onClose, medicine, authFetch, onS
     setMsg('');
 
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/medicines/stock-in', {
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines/stock-in`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

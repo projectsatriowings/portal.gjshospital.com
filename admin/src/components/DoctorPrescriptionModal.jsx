@@ -46,7 +46,7 @@ export default function DoctorPrescriptionModal({ isOpen, onClose, appointment, 
     { name: '', dosage: '1-0-1', duration: '5 days', instructions: 'After food' }
   ]);
 
-  // Doctor Medicine Autocomplete State
+  // Catalog search state for auto-suggest (Part 6)
   const [searchResults, setSearchResults] = useState([]);
   const [activeRowIdx, setActiveRowIdx] = useState(null);
 
@@ -62,7 +62,7 @@ export default function DoctorPrescriptionModal({ isOpen, onClose, appointment, 
       return;
     }
     try {
-      const res = await authFetch(`http://localhost:5000/api/doctor/medicines/search?q=${encodeURIComponent(query.trim())}`);
+      const res = await authFetch(`${API_BASE_URL}/doctor/medicines/search?q=${encodeURIComponent(query.trim())}`);
       const data = await res.json();
       if (data.success) {
         setSearchResults(data.data || []);
@@ -111,7 +111,7 @@ export default function DoctorPrescriptionModal({ isOpen, onClose, appointment, 
     setSuccessMsg(null);
 
     try {
-      const res = await authFetch(`http://localhost:5000/api/doctor/appointments/${appointment.id}/prescription`, {
+      const res = await authFetch(`${API_BASE_URL}/doctor/appointments/${appointment.id}/prescription`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

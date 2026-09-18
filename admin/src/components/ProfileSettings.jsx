@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { User, Mail, Phone, Lock, Shield, CheckCircle2, AlertCircle, RefreshCw, KeyRound, Building2, Globe } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 const ProfileSettings = () => {
   const { user, updateProfile, authFetch } = useAuth();
@@ -23,7 +24,7 @@ const ProfileSettings = () => {
   const [langMsg, setLangMsg] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/admin/settings/hospital')
+    fetch(`${API_BASE_URL}/admin/settings/hospital`)
       .then(r => r.json())
       .then(d => {
         if (d.success && d.data?.language_preference) {
@@ -38,7 +39,7 @@ const ProfileSettings = () => {
     setLangSaving(true);
     setLangMsg('');
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/settings/hospital', {
+      const res = await authFetch(`${API_BASE_URL}/admin/settings/hospital`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ language_preference: hospitalLang })

@@ -60,8 +60,7 @@ import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-const SERVER_URL = API_BASE_URL.replace('/api', '');
+import { API_BASE_URL, SERVER_BASE_URL as SERVER_URL } from './config/api';
 
 function AdminPanel() {
   const { user, logout, authFetch } = useAuth();

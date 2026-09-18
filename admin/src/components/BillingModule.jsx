@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, Search, RefreshCw, Eye, Download, Plus, X, User } from 'lucide-react';
 import BillDetailModal from './BillDetailModal';
+import { API_BASE_URL } from '../config/api';
 
 export default function BillingModule({ authFetch, user, defaultStatusFilter = 'all' }) {
   const [bills, setBills] = useState([]);
@@ -27,7 +28,7 @@ export default function BillingModule({ authFetch, user, defaultStatusFilter = '
     if (!patientQuery.trim()) return;
     setSearchingPatients(true);
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/patients?search=${encodeURIComponent(patientQuery.trim())}`);
+      const res = await authFetch(`${API_BASE_URL}/admin/patients?search=${encodeURIComponent(patientQuery.trim())}`);
       const data = await res.json();
       if (data.success) {
         setPatientResults(data.data || []);
@@ -41,7 +42,7 @@ export default function BillingModule({ authFetch, user, defaultStatusFilter = '
 
   const handleCreateBillForPatient = async (patientId) => {
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/bills/create-standalone`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/bills/create-standalone`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ patient_id: patientId, force_new: true })
@@ -65,7 +66,7 @@ export default function BillingModule({ authFetch, user, defaultStatusFilter = '
     setLoading(true);
     setError(null);
     try {
-      let url = `http://localhost:5000/api/admin/bills?status=${statusFilter}`;
+      let url = `${API_BASE_URL}/admin/bills?status=${statusFilter}`;
       if (searchQuery.trim()) url += `&query=${encodeURIComponent(searchQuery.trim())}`;
 
       const res = await authFetch(url);

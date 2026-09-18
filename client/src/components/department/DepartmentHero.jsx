@@ -3,9 +3,7 @@ import { Link } from 'react-router-dom';
 import { Calendar, PhoneCall, Heart, Stethoscope, Sparkles } from 'lucide-react';
 import doctorBannerImg from '../../assets/doctorbanner-DBb3fK7X.avif';
 
-const SERVER_URL = import.meta.env.VITE_API_BASE_URL
-  ? import.meta.env.VITE_API_BASE_URL.replace('/api', '')
-  : 'http://localhost:5000';
+import { SERVER_BASE_URL as SERVER_URL } from '../../services/api';
 
 const DepartmentHero = ({ department }) => {
   const tagline = department.hero?.description || department.tagline || department.short_description || `Advanced & Comprehensive ${department.name} Care with Experienced Specialists and World-Class Medical Infrastructure.`;

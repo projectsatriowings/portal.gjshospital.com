@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Save, ShieldAlert, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 export default function PharmacySettings({ authFetch, user }) {
   const [reorderLevel, setReorderLevel] = useState(10);
@@ -11,7 +12,7 @@ export default function PharmacySettings({ authFetch, user }) {
   const fetchSettings = async () => {
     setLoading(true);
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/medicines/settings');
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines/settings`);
       const data = await res.json();
       if (data.success && data.data) {
         setReorderLevel(data.data.default_reorder_level || 10);
@@ -34,7 +35,7 @@ export default function PharmacySettings({ authFetch, user }) {
     setMsg('');
 
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/medicines/settings', {
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines/settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, ShoppingBag, Plus, Trash2, Printer, FileText, UserCheck, CheckCircle2, Lock, Users, Eye, AlertTriangle, Pill, Check, X, FilePlus, ShoppingCart, Clock } from 'lucide-react';
+import { API_BASE_URL, getFileUrl } from '../config/api';
 
 // ─── Prescription Medicine Row Component ─────────────────────────────────────
 // Each doctor-prescribed medicine row has:
@@ -206,7 +207,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
 
   const fetchCategories = async () => {
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/medicines/categories');
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines/categories`);
       const data = await res.json();
       if (data.success) {
         setCategories(data.data || []);
@@ -218,7 +219,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
 
   const fetchMedicineCatalog = async () => {
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/medicines?status=ACTIVE');
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines?status=ACTIVE`);
       const data = await res.json();
       if (data.success) {
         setCatalog(data.data || []);
@@ -244,7 +245,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
     }
     setSavingNewMed(true);
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/medicines', {
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -275,7 +276,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
 
   const fetchRecentPatients = async () => {
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/patients?limit=8');
+      const res = await authFetch(`${API_BASE_URL}/admin/patients?limit=8`);
       const data = await res.json();
       if (data.success) {
         setRecentPatients(data.data || []);
@@ -292,7 +293,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
     setSearchingPatients(true);
     setHasSearched(true);
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/patients?search=${encodeURIComponent(patientSearch.trim())}`);
+      const res = await authFetch(`${API_BASE_URL}/admin/patients?search=${encodeURIComponent(patientSearch.trim())}`);
       const data = await res.json();
       if (data.success) {
         setPatients(data.data || []);
@@ -323,7 +324,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
 
     try {
       // 1. Fetch active visit bill (most recent PENDING bill for this patient)
-      const billRes = await authFetch(`http://localhost:5000/api/admin/bills/active-visit/${pt.id}`);
+      const billRes = await authFetch(`${API_BASE_URL}/admin/bills/active-visit/${pt.id}`);
       const billData = await billRes.json();
       if (billData.success) {
         setActiveBill(billData.activeBill || null);
@@ -331,7 +332,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
       }
 
       // 2. Fetch most recent appointment with prescription for this patient
-      const rxRes = await authFetch(`http://localhost:5000/api/admin/appointments?patientId=${pt.id}`);
+      const rxRes = await authFetch(`${API_BASE_URL}/admin/appointments?patientId=${pt.id}`);
       const rxData = await rxRes.json();
       if (rxData.success && Array.isArray(rxData.data)) {
         // Find the most recent appointment that has a prescription
@@ -339,7 +340,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
         if (appWithRx && appWithRx.prescription_id) {
           // Fetch full prescription with medicines via pharmacy-accessible endpoint
           const detailRes = await authFetch(
-            `http://localhost:5000/api/admin/medicines/prescription/by-appointment/${appWithRx.id}`
+            `${API_BASE_URL}/admin/medicines/prescription/by-appointment/${appWithRx.id}`
           );
           const detailData = await detailRes.json();
           if (detailData.success && detailData.data) {
@@ -367,7 +368,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
     if (!selectedPatient) return;
     setLoadingBill(true);
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/bills/create-standalone`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/bills/create-standalone`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -413,7 +414,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
     }
 
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/medicines/dispense', {
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines/dispense`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -449,7 +450,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
   // Mark Buy Outside (Part 3b)
   const handleMarkBuyOutside = async (medItem, note) => {
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/medicines/buy-outside', {
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines/buy-outside`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -475,13 +476,13 @@ export default function PharmacyDispensing({ authFetch, user }) {
   // Download/Print Previous Bill Receipt PDF
   const handleDownloadReceipt = async (billObj) => {
     if (billObj.pdf_url) {
-      window.open(`http://localhost:5000${billObj.pdf_url}`, '_blank');
+      window.open(getFileUrl(billObj.pdf_url), '_blank');
     } else {
       try {
-        const res = await authFetch(`http://localhost:5000/api/admin/bills/${billObj.id}/pdf`);
+        const res = await authFetch(`${API_BASE_URL}/admin/bills/${billObj.id}/pdf`);
         const data = await res.json();
         if (data.success && data.pdfUrl) {
-          window.open(`http://localhost:5000${data.pdfUrl}`, '_blank');
+          window.open(getFileUrl(data.pdfUrl), '_blank');
         } else {
           alert('Failed to generate receipt PDF');
         }
@@ -497,10 +498,10 @@ export default function PharmacyDispensing({ authFetch, user }) {
     if (!prescription) return;
     setGeneratingPdf(true);
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/medicines/buy-outside-pdf/${prescription.id}`);
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines/buy-outside-pdf/${prescription.id}`);
       const data = await res.json();
       if (data.success && data.pdfUrl) {
-        window.open(`http://localhost:5000${data.pdfUrl}`, '_blank');
+        window.open(getFileUrl(data.pdfUrl), '_blank');
       } else {
         alert(data.error || 'Failed to generate Buy Outside Note PDF.');
       }
@@ -538,7 +539,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
     setMsg('');
 
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/bills/${activeBill.id}/items`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/bills/${activeBill.id}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -603,7 +604,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
     setMsg('');
 
     try {
-      const res = await authFetch('http://localhost:5000/api/admin/medicines/dispense', {
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines/dispense`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -642,7 +643,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
   const handleConfirmPharmacyIssue = async () => {
     if (!activeBill) return;
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/bills/${activeBill.id}/confirm-pharmacy`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/bills/${activeBill.id}/confirm-pharmacy`, {
         method: 'POST'
       });
       const data = await res.json();
@@ -662,7 +663,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
   const handleRemoveItem = async (itemId) => {
     if (!activeBill) return;
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/bills/${activeBill.id}/items/${itemId}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/bills/${activeBill.id}/items/${itemId}`, {
         method: 'DELETE'
       });
       const data = await res.json();
@@ -698,7 +699,7 @@ export default function PharmacyDispensing({ authFetch, user }) {
 
     // 2. Sync to backend database silently in the background
     try {
-      await authFetch(`http://localhost:5000/api/admin/bills/${activeBill.id}/items/${itemId}`, {
+      await authFetch(`${API_BASE_URL}/admin/bills/${activeBill.id}/items/${itemId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity: qtyVal })

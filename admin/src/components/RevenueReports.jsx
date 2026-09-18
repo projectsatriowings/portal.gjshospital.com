@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, Calendar, Download, RefreshCw, PieChart, CreditCard, ShieldAlert, Bell, CheckCircle2, TrendingUp, Lock } from 'lucide-react';
+import { API_BASE_URL, getFileUrl } from '../config/api';
 
 export default function RevenueReports({ authFetch, user }) {
   const [period, setPeriod] = useState('1m');
@@ -21,7 +22,7 @@ export default function RevenueReports({ authFetch, user }) {
     setError(null);
     try {
       // 1. Fetch Revenue Analytics Data
-      const res = await authFetch(`http://localhost:5000/api/admin/reports/revenue?period=${p}`);
+      const res = await authFetch(`${API_BASE_URL}/admin/reports/revenue?period=${p}`);
       const data = await res.json();
       if (data.success) {
         setReportData(data.data);
@@ -31,7 +32,7 @@ export default function RevenueReports({ authFetch, user }) {
       }
 
       // 2. Fetch Revenue Audit Reminder Status
-      const remRes = await authFetch(`http://localhost:5000/api/admin/reports/reminder`);
+      const remRes = await authFetch(`${API_BASE_URL}/admin/reports/reminder`);
       const remData = await remRes.json();
       if (remData.success) {
         setReminderInfo(remData.data);
@@ -58,10 +59,10 @@ export default function RevenueReports({ authFetch, user }) {
   const handleDownloadPdf = async () => {
     setDownloadingPdf(true);
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/reports/revenue/pdf?period=${period}`);
+      const res = await authFetch(`${API_BASE_URL}/admin/reports/revenue/pdf?period=${period}`);
       const data = await res.json();
       if (data.success && data.pdfUrl) {
-        window.open(`http://localhost:5000${data.pdfUrl}`, '_blank');
+        window.open(getFileUrl(data.pdfUrl), '_blank');
       }
     } catch (err) {
       console.error('Error downloading PDF:', err);
@@ -76,7 +77,7 @@ export default function RevenueReports({ authFetch, user }) {
     setSavingReminder(true);
     setReminderMsg('');
     try {
-      const res = await authFetch(`http://localhost:5000/api/admin/reports/reminder`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/reports/reminder`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reminderDate })

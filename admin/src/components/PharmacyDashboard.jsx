@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Pill, Layers, Package, AlertTriangle, AlertCircle, Clock, DollarSign, Calendar, FileText, RefreshCw, Info, CheckCircle2 } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 export default function PharmacyDashboard({ authFetch, user, setActiveTab }) {
   const [loading, setLoading] = useState(true);
@@ -22,7 +23,7 @@ export default function PharmacyDashboard({ authFetch, user, setActiveTab }) {
     setError(null);
     try {
       // 1. Fetch KPI Stats
-      const statRes = await authFetch('http://localhost:5000/api/admin/medicines/dashboard-stats');
+      const statRes = await authFetch(`${API_BASE_URL}/admin/medicines/dashboard-stats`);
       const statData = await statRes.json();
       if (statData.success) {
         setStats(statData.stats);
@@ -31,7 +32,7 @@ export default function PharmacyDashboard({ authFetch, user, setActiveTab }) {
       }
 
       // 2. Fetch Alerts
-      const alertRes = await authFetch('http://localhost:5000/api/admin/medicines/alerts');
+      const alertRes = await authFetch(`${API_BASE_URL}/admin/medicines/alerts`);
       const alertData = await alertRes.json();
       if (alertData.success) {
         setAlerts(alertData.data || []);

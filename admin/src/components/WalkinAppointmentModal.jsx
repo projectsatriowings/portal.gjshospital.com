@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Search, UserCheck, Calendar, Clock, Stethoscope, Building, FileText, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+import { API_BASE_URL } from '../config/api';
 
 export default function WalkinAppointmentModal({ isOpen, onClose, onSuccess, doctors = [], departments = [] }) {
   const { authFetch } = useAuth();

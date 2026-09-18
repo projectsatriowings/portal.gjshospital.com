@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Calendar, Clock, User, Stethoscope, Building, Ticket, FileText, CheckCircle2, AlertCircle, RotateCcw, XCircle, UserX, History, Printer, UserCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+import { API_BASE_URL, getFileUrl } from '../config/api';
 
 export default function AppointmentDetailModal({ isOpen, appointmentId, onClose, onRefresh }) {
   const { authFetch, user } = useAuth();
@@ -209,7 +209,7 @@ export default function AppointmentDetailModal({ isOpen, appointmentId, onClose,
       const res = await authFetch(`${API_BASE_URL}/admin/appointments/${appointment.id}/slip`);
       const data = await res.json();
       if (data.success && data.pdfUrl) {
-        window.open(`http://localhost:5000${data.pdfUrl}`, '_blank');
+        window.open(getFileUrl(data.pdfUrl), '_blank');
       }
     } catch (err) {
       setError('Failed to generate printed appointment slip');
@@ -221,9 +221,9 @@ export default function AppointmentDetailModal({ isOpen, appointmentId, onClose,
       const res = await authFetch(`${API_BASE_URL}/admin/appointments/${appointment.id}/prescription`);
       const data = await res.json();
       if (data.success && data.data?.pdf_url) {
-        window.open(`http://localhost:5000${data.data.pdf_url}`, '_blank');
+        window.open(getFileUrl(data.data.pdf_url), '_blank');
       } else if (data.success && data.data?.paper_rx_url) {
-        window.open(data.data.paper_rx_url, '_blank');
+        window.open(getFileUrl(data.data.paper_rx_url), '_blank');
       } else {
         setError('No prescription recorded for this appointment yet.');
       }

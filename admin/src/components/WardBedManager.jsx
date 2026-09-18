@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Building2, BedDouble, Plus, Edit, Trash2, X, Activity, Check } from 'lucide-react';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+import { API_BASE_URL } from '../config/api';
 
 export default function WardBedManager({ authFetch, user }) {
   const [wards, setWards] = useState([]);

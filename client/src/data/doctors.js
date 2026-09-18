@@ -35,7 +35,7 @@ export const doctorsData = [
   { id: 31, name: "DR. S. SANTHOSH KUMAR", specialty: "General Surgery", consults: "MBBS, DNB, FAIS, FIAGES, DIP, Laparoscopic&Laser Surgeon", gender: "male" }
 ];
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ? import.meta.env.VITE_API_BASE_URL.replace('/api', '') : 'http://localhost:5000';
+import { SERVER_BASE_URL as API_BASE_URL } from '../services/api';
 
 export const getDoctorImage = (gender, customUrl) => {
   if (customUrl && typeof customUrl === 'string' && customUrl.trim() !== '') {

@@ -17,13 +17,14 @@ const getDepartmentIcon = (iconName) => {
   }
 };
 
+import { API_BASE_URL } from '../../services/api';
+
 const RelatedDepartments = ({ currentDeptId }) => {
   const [relatedDepts, setRelatedDepts] = useState([]);
 
   useEffect(() => {
     const fetchRelated = async () => {
       try {
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
         const res = await fetch(`${API_BASE_URL}/departments/related/${currentDeptId}`);
         const data = await res.json();
         if (data.success) {

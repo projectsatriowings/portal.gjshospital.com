@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Search, RefreshCw, AlertTriangle, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 export default function PharmacyExpiry({ authFetch, user }) {
   const [medicines, setMedicines] = useState([]);
@@ -13,7 +14,7 @@ export default function PharmacyExpiry({ authFetch, user }) {
     setError(null);
     try {
       // Query all medicines
-      const res = await authFetch('http://localhost:5000/api/admin/medicines?status=ACTIVE');
+      const res = await authFetch(`${API_BASE_URL}/admin/medicines?status=ACTIVE`);
       const data = await res.json();
       if (data.success) {
         // Filter medicines expiring in next X days

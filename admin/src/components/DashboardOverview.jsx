@@ -5,6 +5,7 @@ import {
   Search, ShieldCheck, ChevronRight, Eye, RefreshCw, BarChart2, PieChart,
   Pill, Layers, Package
 } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 export default function DashboardOverview({
   authFetch,
@@ -18,45 +19,36 @@ export default function DashboardOverview({
   const [stats, setStats] = useState({
     todayAppointmentsCount: 0,
     todayPatientsCount: 0,
-    totalDoctors: 0,
-    todayRevenue: 0,
     pendingBillsCount: 0,
-    pendingBillsAmount: 0,
+    pendingBillsAmount: 0.00,
     opdCompletedCount: 0,
-    pendingPrescriptionsCount: 0,
-    lowStockCount: 0,
+    todayRevenueAmount: 0.00,
+    monthlyRevenueAmount: 0.00,
     activeIpdCount: 0,
     totalBedsCount: 0,
     occupiedBedsCount: 0
   });
 
-  const [pharmStats, setPharmStats] = useState({
-    totalMedicines: 0,
-    totalCategories: 0,
-    totalStock: 0,
-    lowStockCount: 0,
-    outOfStockCount: 0,
-    expiringCount: 0,
-    todaySales: 0,
-    monthlyRevenue: 0,
-    pendingPrescriptions: 0
+  const [revenueTrend, setRevenueTrend] = useState({
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    data: [12000, 19000, 15000, 25000, 22000, 30000, 28000]
   });
 
   const [recentAppointments, setRecentAppointments] = useState([]);
   const [recentPatients, setRecentPatients] = useState([]);
-  const [revenueTrend, setRevenueTrend] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [pharmStats, setPharmStats] = useState(null);
 
   const [appFilter, setAppFilter] = useState('all');
   const [appPage, setAppPage] = useState(1);
   const appsPerPage = 5;
 
   const [hoveredCard, setHoveredCard] = useState(null);
-  const [notifications, setNotifications] = useState([]);
   const [deptData, setDeptData] = useState([
-    { name: 'Cardiology', count: 40, color: '#3b82f6' },
-    { name: 'Orthopaedics', count: 30, color: '#10b981' },
-    { name: 'Neurology', count: 20, color: '#8b5cf6' },
-    { name: 'Pediatrics', color: '#f59e0b', count: 15 },
+    { name: 'Cardiology', count: 28, color: '#3b82f6' },
+    { name: 'Orthopedics', count: 22, color: '#10b981' },
+    { name: 'Pediatrics', count: 18, color: '#8b5cf6' },
+    { name: 'Neurology', count: 12, color: '#f59e0b' },
     { name: 'General Medicine', count: 10, color: '#06b6d4' }
   ]);
 
@@ -65,7 +57,7 @@ export default function DashboardOverview({
     if (showLoader) setLoading(true);
     try {
       // 1. Fetch dashboard overview stats & revenue trend from backend
-      const statsRes = await authFetch('http://localhost:5000/api/admin/appointments/dashboard-overview-stats');
+      const statsRes = await authFetch(`${API_BASE_URL}/admin/appointments/dashboard-overview-stats`);
       const statsData = await statsRes.json();
       if (statsData.success) {
         setStats(statsData.stats);
@@ -75,7 +67,7 @@ export default function DashboardOverview({
       }
 
       // 2. Fetch Appointments for the table list
-      const appRes = await authFetch('http://localhost:5000/api/admin/appointments?limit=100');
+      const appRes = await authFetch(`${API_BASE_URL}/admin/appointments?limit=100`);
       const appData = await appRes.json();
       if (appData.success && Array.isArray(appData.data)) {
         const liveApps = appData.data.map((a, idx) => ({
@@ -106,7 +98,7 @@ export default function DashboardOverview({
       }
 
       // 3. Fetch Recent Patients for the right column list
-      const ptRes = await authFetch('http://localhost:5000/api/admin/patients?limit=5');
+      const ptRes = await authFetch(`${API_BASE_URL}/admin/patients?limit=5`);
       const ptData = await ptRes.json();
       if (ptData.success && Array.isArray(ptData.data)) {
         const livePts = ptData.data.map((p, i) => {
@@ -132,7 +124,7 @@ export default function DashboardOverview({
       }
 
       // 4. Fetch Live Pharmacy Alerts & Expiry warnings
-      const alertRes = await authFetch('http://localhost:5000/api/admin/medicines/alerts');
+      const alertRes = await authFetch(`${API_BASE_URL}/admin/medicines/alerts`);
       const alertData = await alertRes.json();
       if (alertData.success && Array.isArray(alertData.data)) {
         const liveAlerts = alertData.data.map((al, idx) => ({
@@ -146,7 +138,7 @@ export default function DashboardOverview({
 
       // 5. Fetch Live Pharmacy Stats
       if (user?.role === 'SUPER_ADMIN' || user?.role === 'HOSPITAL_ADMIN' || user?.role === 'PHARMACIST') {
-        const pharmRes = await authFetch('http://localhost:5000/api/admin/medicines/dashboard-stats');
+        const pharmRes = await authFetch(`${API_BASE_URL}/admin/medicines/dashboard-stats`);
         const pharmData = await pharmRes.json();
         if (pharmData.success) {
           setPharmStats(pharmData.stats);

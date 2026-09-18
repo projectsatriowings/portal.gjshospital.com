@@ -2,9 +2,7 @@ import React from 'react';
 import { Target, Compass, CheckCircle2, Award } from 'lucide-react';
 import hospitalImg from '../../assets/about2-CjoqBkRb.webp';
 
-const SERVER_URL = import.meta.env.VITE_API_BASE_URL
-  ? import.meta.env.VITE_API_BASE_URL.replace('/api', '')
-  : 'http://localhost:5000';
+import { SERVER_BASE_URL as SERVER_URL } from '../../services/api';
 
 const DepartmentOverview = ({ department }) => {
   const servicesList = Array.isArray(department.overview?.clinical_services) && department.overview.clinical_services.length > 0

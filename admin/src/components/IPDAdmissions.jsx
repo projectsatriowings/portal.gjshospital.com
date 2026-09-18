@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BedDouble, Plus, Search, User, UserCheck, CheckCircle2, FileText, Calendar, Activity, X } from 'lucide-react';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+import { API_BASE_URL, getFileUrl } from '../config/api';
 
 export default function IPDAdmissions({ authFetch, user }) {
   const [admissions, setAdmissions] = useState([]);
@@ -283,7 +283,7 @@ export default function IPDAdmissions({ authFetch, user }) {
       const res = await authFetch(`${API_BASE_URL}/admin/bills/${bill.id}/pdf`);
       const data = await res.json();
       if (data.success && data.pdfUrl) {
-        window.open(`http://localhost:5000${data.pdfUrl}`, '_blank');
+        window.open(getFileUrl(data.pdfUrl), '_blank');
       } else {
         alert(data.error || 'Failed to generate PDF');
       }

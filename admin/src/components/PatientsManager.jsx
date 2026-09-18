@@ -6,7 +6,7 @@ import {
   X, Eye, Edit, ChevronRight, UserPlus, FileSpreadsheet, CreditCard
 } from 'lucide-react';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import { API_BASE_URL, getFileUrl } from '../config/api';
 
 const PatientsManager = () => {
   const { authFetch } = useAuth();
@@ -500,7 +500,7 @@ const PatientsManager = () => {
                             {adm.status === 'DISCHARGED' && adm.discharge_summary_url && (
                               <button
                                 type="button"
-                                onClick={() => window.open(`http://localhost:5000${adm.discharge_summary_url}`, '_blank')}
+                                onClick={() => window.open(getFileUrl(adm.discharge_summary_url), '_blank')}
                                 style={{ background: '#0284c7', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
                               >
                                 📄 Discharge Summary
@@ -551,7 +551,7 @@ const PatientsManager = () => {
                           {pr.pdf_url && (
                             <button
                               type="button"
-                              onClick={() => window.open(`http://localhost:5000${pr.pdf_url}`, '_blank')}
+                              onClick={() => window.open(getFileUrl(pr.pdf_url), '_blank')}
                               style={{ background: '#0284c7', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
                             >
                               📄 Download Prescription PDF
@@ -594,7 +594,7 @@ const PatientsManager = () => {
                             {b.pdf_url && (
                               <button
                                 type="button"
-                                onClick={() => window.open(`http://localhost:5000${b.pdf_url}`, '_blank')}
+                                onClick={() => window.open(getFileUrl(b.pdf_url), '_blank')}
                                 style={{ background: '#0284c7', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
                               >
                                 📄 Invoice PDF
