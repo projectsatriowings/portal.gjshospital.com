@@ -29,10 +29,15 @@ export default function DashboardOverview({
     occupiedBedsCount: 0
   });
 
-  const [revenueTrend, setRevenueTrend] = useState({
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    data: [12000, 19000, 15000, 25000, 22000, 30000, 28000]
-  });
+  const [revenueTrend, setRevenueTrend] = useState([
+    { date: 'Mon', amount: 12000 },
+    { date: 'Tue', amount: 19000 },
+    { date: 'Wed', amount: 15000 },
+    { date: 'Thu', amount: 25000 },
+    { date: 'Fri', amount: 22000 },
+    { date: 'Sat', amount: 30000 },
+    { date: 'Sun', amount: 28000 }
+  ]);
 
   const [recentAppointments, setRecentAppointments] = useState([]);
   const [recentPatients, setRecentPatients] = useState([]);
@@ -316,18 +321,18 @@ export default function DashboardOverview({
   }
 
   const renderRevenueChart = () => {
-    if (!revenueTrend || revenueTrend.length === 0) {
+    if (!Array.isArray(revenueTrend) || revenueTrend.length === 0) {
       return <div style={{ color: '#94a3b8', fontSize: '13px', textAlign: 'center', padding: '20px' }}>No revenue trend data available.</div>;
     }
 
-    const maxAmt = Math.max(...revenueTrend.map(d => d.amount), 1000);
+    const maxAmt = Math.max(...revenueTrend.map(d => (d?.amount || 0)), 1000);
     const height = 90;
     const width = 240;
     const padding = 10;
 
     const points = revenueTrend.map((d, index) => {
-      const x = padding + (index * (width - 2 * padding)) / (revenueTrend.length - 1);
-      const y = height - padding - (d.amount / maxAmt) * (height - 2 * padding);
+      const x = padding + (index * (width - 2 * padding)) / Math.max(revenueTrend.length - 1, 1);
+      const y = height - padding - ((d?.amount || 0) / maxAmt) * (height - 2 * padding);
       return { x, y, ...d };
     });
 
