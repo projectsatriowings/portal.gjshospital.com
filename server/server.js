@@ -10,6 +10,7 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { pool } from './config/db.js';
 import doctorsRoutes, { ensureDoctorColumnsExist } from './routes/doctors.js';
 import appointmentsRoutes from './routes/appointments.js';
@@ -83,6 +84,34 @@ app.use('/api', contentRoutes); // /api/testimonials, /api/banners, /api/partner
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'G.J.S Hospital API server is running' });
 });
+
+// ─── OPTIONAL ALL-IN-ONE SUBDOMAIN SERVING (Slash Method) ─────────
+// 1. Serve Admin Portal at /admin (if admin/dist is present)
+const adminDist = path.join(process.cwd(), '../admin/dist');
+const adminLocalDist = path.join(process.cwd(), 'admin/dist');
+const adminPathToUse = fs.existsSync(adminDist) ? adminDist : (fs.existsSync(adminLocalDist) ? adminLocalDist : null);
+
+if (adminPathToUse) {
+  app.use('/admin', express.static(adminPathToUse));
+  app.get(['/admin', '/admin/*'], (req, res) => {
+    res.sendFile(path.join(adminPathToUse, 'index.html'));
+  });
+}
+
+// 2. Serve Client Portal at / (if client/dist is present)
+const clientDist = path.join(process.cwd(), '../client/dist');
+const clientLocalDist = path.join(process.cwd(), 'client/dist');
+const clientPathToUse = fs.existsSync(clientDist) ? clientDist : (fs.existsSync(clientLocalDist) ? clientLocalDist : null);
+
+if (clientPathToUse) {
+  app.use(express.static(clientPathToUse));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/admin/auth') || req.path.startsWith('/uploads')) {
+      return next();
+    }
+    res.sendFile(path.join(clientPathToUse, 'index.html'));
+  });
+}
 
 const server = app.listen(PORT, async () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
